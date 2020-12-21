@@ -492,12 +492,12 @@ TEST(attributes, partial_shape)
 TEST(attributes, max_pool_op)
 {
     FactoryRegistry<Node>::get().register_factory<opset1::MaxPool>();
-    auto data = make_shared<op::Parameter>(element::f32, Shape{64, 3, 5});
+    auto data = make_shared<op::Parameter>(element::f32, Shape{64, 3, 5, 1});
 
-    auto strides = Strides{2};
-    auto pads_begin = Shape{1};
-    auto pads_end = Shape{1};
-    auto kernel = Shape{1};
+    auto strides = Strides{2, 2};
+    auto pads_begin = Shape{1, 1};
+    auto pads_end = Shape{1, 1};
+    auto kernel = Shape{1, 1};
     auto rounding_mode = op::RoundingType::FLOOR;
     auto auto_pad = op::PadType::EXPLICIT;
 
