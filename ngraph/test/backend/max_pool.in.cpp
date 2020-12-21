@@ -136,13 +136,13 @@ NGRAPH_TEST(${BACKEND_NAME}, max_pool_2d_same_upper)
     test_case.run();
 }
 
-NGRAPH_TEST(${BACKEND_NAME}, max_pool_3d)
+NGRAPH_TEST(${BACKEND_NAME}, max_pool_3d_valid)
 {
     Shape in_shape{1, 1, 2, 2, 2};
     Shape out_shape{1, 1, 2, 2, 1};
     const Strides& strides{1, 1, 1};
-    const Shape& pads_begin{0, 0, 0};
-    const Shape& pads_end{0, 0, 0};
+    const Shape& pads_begin{1, 1, 1};
+    const Shape& pads_end{1, 1, 1};
     const Shape& kernel{1, 1, 2};
     const op::RoundingType rounding_type = op::RoundingType::CEIL;
     const op::PadType pad_type = op::PadType::VALID;
