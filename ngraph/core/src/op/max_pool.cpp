@@ -97,6 +97,25 @@ void op::v1::MaxPool::validate_and_infer_types()
     }
 
     const PartialShape& arg_shape = get_input_partial_shape(0);
+
+    NODE_VALIDATION_CHECK(this,
+                          arg_shape.rank().compatible(4) || arg_shape.rank().compatible(5),
+                          "Expected a 4D or 5D tensor for the input. Got: ",
+                          arg_shape);
+
+    if (arg_shape.rank().is_static())
+    {
+        NODE_VALIDATION_CHECK(this,
+                              m_pads_end.size() == arg_shape.rank().get_max_length() - 2,
+                              "Expected pads_end size to be equal to input size - 2. Got: ",
+                              m_pads_end.size());
+
+        NODE_VALIDATION_CHECK(this,
+                              m_pads_begin.size() == arg_shape.rank().get_max_length() - 2,
+                              "Expected pads_begin size to be equal to input size - 2. Got: ",
+                              m_pads_begin.size());
+    }
+
     auto output_shape = PartialShape::dynamic();
     if (arg_shape.rank().is_static())
     {
@@ -111,8 +130,18 @@ void op::v1::MaxPool::validate_and_infer_types()
         }
     }
 
-    const bool update_auto_padding_succeed =
-        update_auto_padding(arg_shape, m_pads_end, m_pads_begin);
+    bool update_auto_padding_succeed = true;
+    if (m_auto_pad == PadType::SAME_UPPER || m_auto_pad == PadType::SAME_LOWER)
+    {
+        CoordinateDiff pads_end;
+        CoordinateDiff pads_begin;
+        update_auto_padding_succeed = update_auto_padding(arg_shape, m_pads_end, m_pads_begin);
+    }
+    if (m_auto_pad == PadType::VALID)
+    {
+        m_pads_end = Shape(m_pads_end.size(), 0);
+        m_pads_begin = Shape(m_pads_begin.size(), 0);
+    }
 
     // infer_batched_forward_pooling wants CoordinateDiffs for these, while the pooling ops for
     // now still take Shape (no negative padding).
